@@ -32,7 +32,11 @@ if not os.path.exists("/home/sky/Documents/Pass_gen/password.txt"):
 # --------------------------------------------------------------------------------------------
 #Définition des fonctions
 def result():
-    resultat = pwd(int(number_chara.get()), include_number.get())
+    num = int(number_chara.get())
+    if num > 250:
+        resultat = pwd(int(250), include_number.get())
+    else:
+        resultat = pwd(int(number_chara.get()), include_number.get())
     label_resultat.config(text=resultat)
 
 def copier_texte():
