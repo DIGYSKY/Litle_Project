@@ -9,10 +9,23 @@
 # --------------------------------------------------------------------------------------------
 # Importation des modules
 import pyperclip
+import os
 import tkinter as tk
-# from tkinter import * 
-# from tkinter import ttk 
+from tkinter import ttk
+from tkinter import filedialog
+from tkinter import messagebox
 from function import gener_password as pwd
+# --------------------------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------------------------
+# Creation du fichier temporaire
+if not os.path.exists("/home/sky/Documents/Pass_gen"):
+    os.mkdir("/home/sky/Documents/Pass_gen")
+if not os.path.exists("/home/sky/Documents/Pass_gen/password.txt"):
+    with open("/home/sky/Documents/Pass_gen/password.txt", "w") as file:
+        file.write("")
+    file.close()
 # --------------------------------------------------------------------------------------------
 
 
@@ -23,18 +36,48 @@ def result():
     label_resultat.config(text=resultat)
 
 def copier_texte():
-    with open("password.txt", "r") as file:
-        if label_resultat.cget("text") in file.read():
-            label_cpy.config(text="Le mot de passe à déja été utiliser !")
-            file.close()
-        else:
-            file.close()
-            texte = label_resultat.cget("text")
-            pyperclip.copy(texte)
-            with open("password.txt", "a") as file:
-                file.write(f"{texte}\n")
-            file.close()
-            label_cpy.config(text="Le mot de passe a été copier dans le presse papier !")
+    sherch_result = 0
+    texte = label_resultat.cget("text")
+    
+    with open("/home/sky/Documents/Pass_gen/password.txt", "r") as file:
+        for i in file:
+            sherch = i.strip()
+            if sherch == texte:
+                sherch_result = 1
+                break
+
+    if sherch_result == 1:
+        pyperclip.copy(texte)
+        label_cpy.config(text="Le mot de passe a déjà été utilisé !")
+    else:
+        with open("/home/sky/Documents/Pass_gen/password.txt", "a") as file:
+            file.write(f"{texte}\n\n")
+        pyperclip.copy(texte)
+        label_cpy.config(text="Le mot de passe a été copié dans le presse-papier !")
+
+def open_file():
+    file = filedialog.askopenfilename(initialdir="/home/sky/Documents/Pass_gen", title="Select a file")
+    with open(file, "r") as file:
+        contenu = file.read()
+        window =tk.Toplevel()
+        window.title("Password")
+        window.geometry("800x700")
+        
+        # Créez une instance de Scrollbar
+        scrollbar = ttk.Scrollbar(window)
+
+        # Créez un widget Text pour afficher le contenu du fichier
+        texte = tk.Text(window, wrap="word")
+        texte.insert(tk.END, contenu)
+        texte.configure(state="disabled")
+
+        # Associez la Scrollbar à votre zone de texte
+        texte.configure(yscrollcommand=scrollbar.set)
+        scrollbar.configure(command=texte.yview)
+
+        # Placez la Scrollbar et la zone de texte dans votre fenêtre
+        scrollbar.pack(side="right", fill="y")
+        texte.pack(side="left", fill="both", expand=True)
 # --------------------------------------------------------------------------------------------
 
 
@@ -53,6 +96,7 @@ barre_menu = tk.Menu(window) # You want the menu to be in the window
 # Création du menu "Fichier"
 menu_fichier = tk.Menu(barre_menu, tearoff=0) # You want the menu to be in the menu bar
 menu_fichier.add_command(label="Genéré", command=result) # You want the menu to be "New" and the command to be the function you created
+menu_fichier.add_command(label="Ouvrir", command=open_file) # You want the menu to be "Open" and the command to be the function you created
 menu_fichier.add_separator() # You want a separator
 menu_fichier.add_command(label="Quitter", command=window.quit) # You want the menu to be "Quit" and the command to be the function you created
 barre_menu.add_cascade(label="Fichier", menu=menu_fichier) # You want the menu to be "File" and the menu to be the menu you created
